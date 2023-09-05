@@ -1,9 +1,19 @@
 from django.db import models
 
+# Prefer use uuid4
+INVITE_CODE_LENGHT = 0
+
+
+def validate_this(code):
+    """
+    Validate lenght of invite code in view
+    """
+    return len(code) == INVITE_CODE_LENGHT
+
 
 # Managers definition here
 class ReferalManager(models.Managers):
-    def creare_referal(self, **kwargs):
+    def creare_referal(self, **kwargs) -> Referal:
         invite_code: str = ""
         return Referal.objects.creare_referal(invite_code=invite_code, **kwargs)
 
@@ -17,7 +27,7 @@ class Referal(models.Model):
     """
 
     phone_number = models.CharField(max_lengh=10)
-    invite_code = models.CharField(max_lengh=8)
+    invite_code = models.CharField(max_lengh=INVITE_CODE_LENGHT)
     invite_from = models.ForeignKey(to="Referal", on_delete=models.SET_NULL)
 
     objects = ReferalManager()
