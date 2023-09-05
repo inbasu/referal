@@ -1,4 +1,5 @@
 from django.db import models
+from uuid import uuid4
 
 # Prefer use uuid4
 INVITE_CODE_LENGHT = 0
@@ -11,34 +12,33 @@ def validate_this(code):
     return len(code) == INVITE_CODE_LENGHT
 
 
-# Managers definition here
-class ReferalManager(models.Managers):
-    def creare_referal(self, **kwargs) -> Referal:
-        invite_code: str = ""
-        return Referal.objects.creare_referal(invite_code=invite_code, **kwargs)
-
-
 # Create your models here.
 class Referal(models.Model):
     """
-    If reuse this class boilerplate
-    Than delete models.Model inheritance
-    And inherit itself
+    Referal boilerplate
     """
 
-    phone_number = models.CharField(max_lengh=10)
-    invite_code = models.CharField(max_lengh=INVITE_CODE_LENGHT)
-    invite_from = models.ForeignKey(to="Referal", on_delete=models.SET_NULL)
+    def generate_code():
+        """I prefere to use uuid4"""
+        return str(uuid4())[:8]
 
-    objects = ReferalManager()
+    invite_code = models.CharField(
+        max_length=INVITE_CODE_LENGHT,
+        default=generate_code,
+        editable=False,
+    )
+    invite_from = models.ForeignKey(
+        to="Referal",
+        on_delete=models.SET_NULL,
+    )
 
     @property
     def referals(self):
-        Referal.objects.filter(invite_from=self)
+        self.__class__.objects.filter(invite_from=self)
 
-    def invite(self, invite_code: str) -> None | Referal:
+    def invite(self, invite_code: str):
         if self.invite_code is None:
-            parent = Referal.objects.filter(invite_code=invite_code)
+            parent = self.__class__.objects.filter(invite_code=invite_code)
             if parent:
                 self.invite_from = parent
                 return parent

@@ -1,6 +1,7 @@
 #project
 django
 redis
+uuid
 
 #dev
 python-dotenv
