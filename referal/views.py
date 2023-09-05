@@ -4,14 +4,6 @@ from .models import validate_this
 # Create your views here.
 
 
-def register_referal(request):
-    """
-    This is mock function
-    In real project use user auth system
-    """
-    ...
-
-
 class InviteView:
     """
     Invite Referal with POST request

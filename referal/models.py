@@ -1,8 +1,11 @@
+from sys import exception
 from django.db import models
 from uuid import uuid4
 
+import referal
+
 # Prefer use uuid4
-INVITE_CODE_LENGHT = 0
+INVITE_CODE_LENGHT = 8
 
 
 def validate_this(code):
@@ -16,11 +19,12 @@ def validate_this(code):
 class Referal(models.Model):
     """
     Referal boilerplate
+    Inherrit it in another model
     """
 
     def generate_code():
         """I prefere to use uuid4"""
-        return str(uuid4())[:8]
+        return str(uuid4())[:INVITE_CODE_LENGHT]
 
     invite_code = models.CharField(
         max_length=INVITE_CODE_LENGHT,
@@ -30,16 +34,20 @@ class Referal(models.Model):
     invite_from = models.ForeignKey(
         to="Referal",
         on_delete=models.SET_NULL,
+        null=True,
     )
 
     @property
     def referals(self):
-        self.__class__.objects.filter(invite_from=self)
+        return self.__class__.objects.filter(invite_from=self)
 
     def invite(self, invite_code: str):
-        if self.invite_code is None:
-            parent = self.__class__.objects.filter(invite_code=invite_code)
-            if parent:
-                self.invite_from = parent
-                return parent
-        return None
+        if self.invite_from is None:
+            try:
+                parent = self.__class__.objects.get(invite_code=invite_code)
+                if parent.id != self.id:
+                    self.invite_from = parent
+                    self.save()
+                    return self
+            except:
+                return None
