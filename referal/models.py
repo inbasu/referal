@@ -1,6 +1,9 @@
 from sys import exception
 from django.db import models
 from uuid import uuid4
+from django.core.exceptions import ObjectDoesNotExist
+
+from django.db.models.fields import uuid
 
 import referal
 
@@ -23,13 +26,17 @@ class Referal(models.Model):
     """
 
     def generate_code():
-        """I prefere to use uuid4"""
-        return str(uuid4())[:INVITE_CODE_LENGHT]
+        """
+        I prefere user uuid
+        """
+        code = str(uuid4())[:INVITE_CODE_LENGHT]
+        return code
 
     invite_code = models.CharField(
         max_length=INVITE_CODE_LENGHT,
         default=generate_code,
         editable=False,
+        null=True,
     )
     invite_from = models.ForeignKey(
         to="Referal",
@@ -49,5 +56,5 @@ class Referal(models.Model):
                     self.invite_from = parent
                     self.save()
                     return self
-            except:
+            except ObjectDoesNotExist:
                 return None
